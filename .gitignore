@@ -1,0 +1,18 @@
+# IDE specific
+.idea/
+.vscode/
+
+# Python specific
+__pycache__/
+.env
+.venv
+env/
+venv/
+changer.py
+
+# Other dirs
+Arch/
+tools/
+!tools/__init__.py
+!tools/installer.sh
+!tools/pipeline.sh

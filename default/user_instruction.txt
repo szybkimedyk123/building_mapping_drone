@@ -1,0 +1,19 @@
+**Hi, welcome to our application**
+
+Click on 'Set input file path', to choose a directory containing images that you want to proceed with.
+Click on 'Set output file path' and then choose the directory in which point the cloud and mesh object will be stored.
+
+In options, you have various things to customize. 
+First thing is 'Max resolution', meaning that images will be scaled to this resolution.
+After that is 'Estimate roi', in which you can choose between options: 0 - do not estimate ROI, 1 - estimate ROI and 2 - adaptive estimating ROI
+The next option is 'Verbosity' and you can choose from 0 to 4.
+If you want to remove depthmaps after processing images, check the next option.
+Next section is about meshing.
+You can choose an option, if you want to integrate only points inside the ROI.
+The next option is the decimation factor, from range 0 to 1, that will be applied to the reconstructed surface.
+You can also choose how many iterations the program will do to smooth mesh object.
+There is also the option to choose the minimum distance in pixels between the projection of two 3D points to consider them different while making mesh.
+The last one is changing the export type between ply or obj.
+If you choose to apply, changes will happen, otherwise changes will be discarded.
+To start an operation, you have to define input and output paths.
+Two buttons with the word 'Show' will open point cloud and mesh respectively. If the program is already finished, there will be your files, otherwise you can choose between default. 

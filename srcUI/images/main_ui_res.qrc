@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/labels">
+        <file alias="background">back_with_drone.png</file>
+        <file alias="background_no_drone">back_no_drone.png</file>
+        <file alias="logo">logo_bmd.png</file>
+        <file alias="cursor">cursor_drone.png</file>
+        <file alias="loading">loading_drone.png</file>
+        <file alias="trampoline">trampoline2.png</file>
+    </qresource>
+</RCC>

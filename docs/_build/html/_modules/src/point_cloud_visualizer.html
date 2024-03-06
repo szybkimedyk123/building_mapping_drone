@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.point_cloud_visualizer &mdash; Building Mapping Drone 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Building Mapping Drone
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">bdm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Building Mapping Drone</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.point_cloud_visualizer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.point_cloud_visualizer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">open3d</span> <span class="k">as</span> <span class="nn">o3d</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<span class="n">GUI_TITLE</span> <span class="o">=</span> <span class="s2">&quot;Point cloud display&quot;</span>
+
+
+<div class="viewcode-block" id="Viewer3D">
+<a class="viewcode-back" href="../../src.html#src.point_cloud_visualizer.Viewer3D">[docs]</a>
+<span class="k">class</span> <span class="nc">Viewer3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to visualize point cloud via Open3D.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - test_mode (bool): rewritten parameter from run_cloud_gui function equals to its test_mode_on</span>
+
+<span class="sd">        - out_dir    (str): rewritten parameter from run_cloud_gui function equals to its output_directory</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_mode</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># Create and initialize gui application instance</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">Application</span><span class="o">.</span><span class="n">instance</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+        <span class="c1"># Create Visualizer with a given title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_vis</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">O3DVisualizer</span><span class="p">(</span><span class="n">GUI_TITLE</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">add_window</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_vis</span><span class="p">)</span>
+        <span class="c1"># Safe test mode setting and directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_mode_on</span> <span class="o">=</span> <span class="n">test_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">=</span> <span class="n">out_dir</span>
+        <span class="c1"># Scene variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Set up data and scene</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_point_clouds</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_o3d_scene</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Viewer3D.setup_point_clouds">
+<a class="viewcode-back" href="../../src.html#src.point_cloud_visualizer.Viewer3D.setup_point_clouds">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_point_clouds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here is created and set up object which represents chosen via test_mode_on flag point cloud.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;default/colorized.ply&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_mode_on</span>
+            <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="p">,</span> <span class="s2">&quot;reconstruction_sequential&quot;</span><span class="p">,</span> <span class="s2">&quot;colorized.ply&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_point_cloud</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="c1"># the name is necessary to remove from the scene</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;point cloud </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="Viewer3D.update_point_clouds">
+<a class="viewcode-back" href="../../src.html#src.point_cloud_visualizer.Viewer3D.update_point_clouds">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_point_clouds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Purpose of this function is to prepare new point cloud position before next application tick.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">points</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Viewer3D.setup_o3d_scene">
+<a class="viewcode-back" href="../../src.html#src.point_cloud_visualizer.Viewer3D.setup_o3d_scene">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup_o3d_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here is prepared scene for main point cloud</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_vis</span><span class="o">.</span><span class="n">add_geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_cloud_o3d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_vis</span><span class="o">.</span><span class="n">reset_camera_to_default</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Viewer3D.run_one_tick">
+<a class="viewcode-back" href="../../src.html#src.point_cloud_visualizer.Viewer3D.run_one_tick">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_one_tick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function contains what should be done in one iteration of visualization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">Application</span><span class="o">.</span><span class="n">instance</span>
+        <span class="n">tick_return</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">run_one_tick</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tick_return</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main_vis</span><span class="o">.</span><span class="n">post_redraw</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">tick_return</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="run_cloud_gui">
+<a class="viewcode-back" href="../../src.html#src.point_cloud_visualizer.run_cloud_gui">[docs]</a>
+<span class="k">def</span> <span class="nf">run_cloud_gui</span><span class="p">(</span><span class="n">test_mode_on</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function runs instance of Viewer3D class in infinite loop to visualize point cloud created via OpenMVG.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - test_mode_on    (bool): Indicates usage of previously prepared test point cloud from default file or user&#39;s one</span>
+
+<span class="sd">        - output_directory (str): String which contains path to user&#39;s point cloud used if test_mode_on = False</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">viewer3d</span> <span class="o">=</span> <span class="n">Viewer3D</span><span class="p">(</span><span class="n">test_mode_on</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">viewer3d</span><span class="o">.</span><span class="n">update_point_clouds</span><span class="p">()</span>
+            <span class="n">viewer3d</span><span class="o">.</span><span class="n">run_one_tick</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;An error occurred:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">param1</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">param2</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">)</span>
+    <span class="n">run_cloud_gui</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, BMD team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

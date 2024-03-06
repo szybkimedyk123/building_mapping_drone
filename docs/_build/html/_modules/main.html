@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main &mdash; Building Mapping Drone 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Building Mapping Drone
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">bdm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Building Mapping Drone</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">main</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This is the main function of the whole project. Here you can find MainWindow class which purpose is to process</span>
+<span class="sd">interaction with the user and running of other scripts. There are specific params connected with animations,</span>
+<span class="sd">display options and communication.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+
+<span class="kn">import</span> <span class="nn">open3d</span> <span class="k">as</span> <span class="nn">o3d</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="kn">from</span> <span class="nn">PySide2.QtGui</span> <span class="kn">import</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">QCursor</span><span class="p">,</span> <span class="n">QTransform</span>
+<span class="kn">from</span> <span class="nn">PySide2.QtWidgets</span> <span class="kn">import</span> <span class="n">QStackedWidget</span><span class="p">,</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QLabel</span>
+<span class="kn">from</span> <span class="nn">PySide2.QtUiTools</span> <span class="kn">import</span> <span class="n">QUiLoader</span>
+<span class="kn">from</span> <span class="nn">PySide2.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">QTimer</span><span class="p">,</span> <span class="n">QPoint</span>
+
+<span class="kn">from</span> <span class="nn">srcUI.images</span> <span class="kn">import</span> <span class="n">main_ui_bit</span>
+
+<span class="n">WRONG_DIRECTORY_MESSAGE</span> <span class="o">=</span> <span class="s1">&#39;Please select correct directory.&#39;</span>
+
+<span class="n">ANIMATION_X_POS</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">ANIMATION_Y_POS</span> <span class="o">=</span> <span class="mi">245</span>
+<span class="n">TRAMPOLINE_X_POS</span> <span class="o">=</span> <span class="mi">125</span>
+<span class="n">TRAMPOLINE_Y_POS</span> <span class="o">=</span> <span class="mi">475</span>
+
+<span class="n">TEST_MODE_ON</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">ADVANCED_DISPLAY</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="MainWindow">
+<a class="viewcode-back" href="../main.html#main.MainWindow">[docs]</a>
+<span class="k">class</span> <span class="nc">MainWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Purpose of this class is to:</span>
+
+<span class="sd">    - process interactions between user and main_ui or options_ui;</span>
+<span class="sd">    - run the main algorithms and update the UI status as they execute;</span>
+<span class="sd">    - create loading screen animation and text messages to user;</span>
+<span class="sd">    - display effects of algorithms in interactive windows.</span>
+
+<span class="sd">    See functions descriptions for more detailed information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="c1"># Application parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_directory</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script_completed</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Initialize the flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">check_script_status</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sudo_pass</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Load main_ui</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">QUiLoader</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;srcUI/main_ui.ui&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Connect signals to main_ui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">input_dir_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_input_directory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_dir_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_output_directory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">options_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options_dialog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">start_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_process</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">cloud_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud_display</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">mesh_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_display</span><span class="p">)</span>
+
+        <span class="c1"># Init buttons states for main_ui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">cloud_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">TEST_MODE_ON</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">mesh_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">TEST_MODE_ON</span><span class="p">)</span>
+
+        <span class="c1"># Load the image for background of main_ui</span>
+        <span class="n">background_image</span> <span class="o">=</span> <span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;:/labels/background&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">background</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">background_image</span><span class="p">)</span>
+
+        <span class="c1"># Load the image for logo of main_ui</span>
+        <span class="n">logo_image</span> <span class="o">=</span> <span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;:/labels/logo&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">logo</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">logo_image</span><span class="p">)</span>
+
+        <span class="c1"># Set funny cursor of main_ui</span>
+        <span class="n">cursor_image</span> <span class="o">=</span> <span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;:/labels/cursor&#39;</span><span class="p">)</span>
+        <span class="n">hot_x</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Set hotspot X coordinate</span>
+        <span class="n">hot_y</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Set hotspot Y coordinate</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">QCursor</span><span class="p">(</span><span class="n">cursor_image</span><span class="p">,</span> <span class="n">hot_x</span><span class="p">,</span> <span class="n">hot_y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">cursor</span><span class="p">)</span>
+
+        <span class="c1"># Load options_ui</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">QUiLoader</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;srcUI/options_ui.ui&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Connect signals to options_ui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">close_opt_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close_options_window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">apply_butt</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_options</span><span class="p">)</span>
+
+        <span class="c1"># Load the image for background of options_ui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">background</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">background_image</span><span class="p">)</span>
+
+        <span class="c1"># Load the image for logo of options_ui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">logo</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">logo_image</span><span class="p">)</span>
+
+        <span class="c1"># Set funny cursor of options_ui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">cursor</span><span class="p">)</span>
+
+        <span class="c1"># Variables for window movement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">QPoint</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_position</span> <span class="o">=</span> <span class="n">QPoint</span><span class="p">()</span>
+
+        <span class="c1"># Animation variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">animation_timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">animation_timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">animate_drone</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_image</span> <span class="o">=</span> <span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;:/labels/loading&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_image_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loading_image</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_image_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loading_image</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trampoline_label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">loading_mess_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Set up start view</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ONLY INTERACTIONS BETWEEN USER AND MAIN_UI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainWindow.close_app">
+<a class="viewcode-back" href="../main.html#main.MainWindow.close_app">[docs]</a>
+    <span class="k">def</span> <span class="nf">close_app</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save close of whole application</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>  <span class="c1"># Assuming &#39;app&#39; is the QApplication instance</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.select_input_directory">
+<a class="viewcode-back" href="../main.html#main.MainWindow.select_input_directory">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_input_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display of QFileDialog.Options window to enable changing input directory plus checking if it is valid via</span>
+<span class="sd">        QFileDialog.getExistingDirectory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">Options</span><span class="p">()</span>
+        <span class="n">options</span> <span class="o">|=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">ShowDirsOnly</span>
+        <span class="k">if</span> <span class="n">directory</span> <span class="o">:=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Select Directory&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_directory</span> <span class="o">=</span> <span class="n">directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">input_text_browser</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">input_text_browser</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">WRONG_DIRECTORY_MESSAGE</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.select_output_directory">
+<a class="viewcode-back" href="../main.html#main.MainWindow.select_output_directory">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_output_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display of QFileDialog.Options window to enable changing output directory plus checking if it is valid via</span>
+<span class="sd">        QFileDialog.getExistingDirectory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">Options</span><span class="p">()</span>
+        <span class="n">options</span> <span class="o">|=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">ShowDirsOnly</span>
+        <span class="k">if</span> <span class="n">directory</span> <span class="o">:=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Select Directory&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span> <span class="o">=</span> <span class="n">directory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_text_browser</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_text_browser</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">WRONG_DIRECTORY_MESSAGE</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.options_dialog">
+<a class="viewcode-back" href="../main.html#main.MainWindow.options_dialog">[docs]</a>
+    <span class="k">def</span> <span class="nf">options_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here is changed displayed window from main_ui to options_ui.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Close the current main window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># Show the new options window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ONLY INTERACTIONS BETWEEN USER AND OPTIONS_UI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainWindow.close_options_window">
+<a class="viewcode-back" href="../main.html#main.MainWindow.close_options_window">[docs]</a>
+    <span class="k">def</span> <span class="nf">close_options_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here is changed currently shown window from options_ui to main_u without applying of chosen settings (if they</span>
+<span class="sd">        are).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Close the current options window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># Show the new main window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.apply_options">
+<a class="viewcode-back" href="../main.html#main.MainWindow.apply_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here is changed currently shown window from options_ui to main_ui with applying of chosen settings (if they</span>
+<span class="sd">        are).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Close the current options window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sudo_pass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">sudo_edit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options_window</span><span class="o">.</span><span class="n">sudo_edit</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sudo_pass</span><span class="p">)</span>
+
+        <span class="c1"># Show the new main window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MOVING THE WINDOWS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainWindow.mousePressEvent">
+<a class="viewcode-back" href="../main.html#main.MainWindow.mousePressEvent">[docs]</a>
+    <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwritten mousePressEvent function from QMainWindow. Done for purpose of enabling moving whole application</span>
+<span class="sd">        window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.mouseMoveEvent">
+<a class="viewcode-back" href="../main.html#main.MainWindow.mouseMoveEvent">[docs]</a>
+    <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwritten mouseMoveEvent function from QMainWindow. Done for purpose of enabling moving whole application</span>
+<span class="sd">        window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span><span class="p">:</span>
+            <span class="n">new_pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">new_pos</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.mouseReleaseEvent">
+<a class="viewcode-back" href="../main.html#main.MainWindow.mouseReleaseEvent">[docs]</a>
+    <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwritten mouseReleaseEvent function from QMainWindow. Done for purpose of enabling moving whole application</span>
+<span class="sd">        window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dragging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_position</span> <span class="o">=</span> <span class="n">QPoint</span><span class="p">()</span></div>
+
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CORE ALGORITHM PROCESSING AND INTERACTION FUNCTIONS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainWindow.run_openmvg_script">
+<a class="viewcode-back" href="../main.html#main.MainWindow.run_openmvg_script">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_openmvg_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_option_a</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">test_windows</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here is called installation and execution of OpenMVG on chosen data or test_win.py script depends on flags.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - use_option_a (bool): Indicates forcing agreement to install of required packages for OpenMVG</span>
+
+<span class="sd">            - test_windows (bool): Indicates to call test_win.py from src package instead of starting installation and execution of OpenMVG</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">run_script</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">test_windows</span><span class="p">:</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="s2">&quot;src</span><span class="se">\\</span><span class="s2">test_win.py&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Build the command as a list of strings</span>
+                    <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;./tools/run_openmvg.sh&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">use_option_a</span><span class="p">:</span>
+                        <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">)</span>
+                    <span class="n">command</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_directory</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="p">])</span>
+
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script_completed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script output:&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Script failed with exit code </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">. Error message: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Start the timer to periodically check the script status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># Check every 1 second</span>
+        <span class="c1"># Run the script in a separate thread</span>
+        <span class="n">script_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_script</span><span class="p">)</span>
+        <span class="n">script_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.check_script_status">
+<a class="viewcode-back" href="../main.html#main.MainWindow.check_script_status">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_script_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Purpose of this function is to check every 1 second if algorithm ended. It is done via connection with QTimer.</span>
+<span class="sd">        When process ends a few things takes place:</span>
+
+<span class="sd">        - turning off animation;</span>
+<span class="sd">        - checking back background to previous one;</span>
+<span class="sd">        - enabling functional buttons again.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script_completed</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script completed successfully.&quot;</span><span class="p">)</span>
+            <span class="c1"># When process ends change status of buttons for display and animation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trampoline_label</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trampoline_label</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># Stop animation, hide message</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">animation_timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">loading_mess_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># Change background</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">background</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;:/labels/background&#39;</span><span class="p">))</span>
+            <span class="c1"># Show ui buttons and so on</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_main_window_status</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script_completed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.set_main_window_status">
+<a class="viewcode-back" href="../main.html#main.MainWindow.set_main_window_status">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_main_window_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function which blocs and hides interface for purpose of processing algorithm and loading screen.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - flag (bool): Indicates visibility of the core UI functionalities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set status of buttons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">input_dir_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_dir_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">options_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">start_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">cloud_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">mesh_butt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">input_dir_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_dir_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">options_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">start_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">cloud_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">mesh_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="c1"># Set status of text edits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_text_browser</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">input_text_browser</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.start_process">
+<a class="viewcode-back" href="../main.html#main.MainWindow.start_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">start_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function starts processing of input data via OpenMVG. It also checks if user set proper input and output</span>
+<span class="sd">        paths for the process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_directory</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="p">:</span>
+                <span class="c1"># Init loading gui and run</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loading_screen</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_openmvg_script</span><span class="p">(</span><span class="n">use_option_a</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">test_windows</span><span class="o">=</span><span class="n">TEST_MODE_ON</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_text_browser</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">WRONG_DIRECTORY_MESSAGE</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">input_text_browser</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">WRONG_DIRECTORY_MESSAGE</span><span class="p">)</span></div>
+
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    LOADING SCREEN&#39;S ANIMATION AND TEXT</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainWindow.loading_screen">
+<a class="viewcode-back" href="../main.html#main.MainWindow.loading_screen">[docs]</a>
+    <span class="k">def</span> <span class="nf">loading_screen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Target of this function is to:</span>
+
+<span class="sd">        - change the background image of UI;</span>
+<span class="sd">        - call set_main_window_status to hide core UI functionalities;</span>
+<span class="sd">        - create animation and start loading screen.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Disable buttons set up position of label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_main_window_status</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">ANIMATION_X_POS</span><span class="p">,</span> <span class="n">ANIMATION_Y_POS</span><span class="p">)</span>
+        <span class="c1"># Create trampoline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trampoline_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trampoline_label</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;:/labels/trampoline&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trampoline_label</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">TRAMPOLINE_X_POS</span><span class="p">,</span> <span class="n">TRAMPOLINE_Y_POS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trampoline_label</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="c1"># Change background</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">background</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;:/labels/background_no_drone&#39;</span><span class="p">))</span>
+        <span class="c1"># Start animation, display message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">animation_timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">loading_mess_butt</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.animate_drone">
+<a class="viewcode-back" href="../main.html#main.MainWindow.animate_drone">[docs]</a>
+    <span class="k">def</span> <span class="nf">animate_drone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function updates move and rotation of a drone&#39;s picture for purpose of loading screen.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">==</span> <span class="mi">360</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Rotate drone</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">QTransform</span><span class="p">()</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">)</span>
+        <span class="n">rotated_pixmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loading_image</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">rotated_pixmap</span><span class="p">)</span>
+        <span class="c1"># Change its position</span>
+        <span class="n">temp_x</span> <span class="o">=</span> <span class="n">ANIMATION_X_POS</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loading_image_w</span> <span class="o">-</span> <span class="n">rotated_pixmap</span><span class="o">.</span><span class="n">width</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">temp_y</span> <span class="o">=</span> <span class="n">ANIMATION_Y_POS</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">loading_image_h</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">temp_x</span><span class="p">,</span> <span class="n">temp_y</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loading_label</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DISPLAY FUNCTIONS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainWindow.cloud_display">
+<a class="viewcode-back" href="../main.html#main.MainWindow.cloud_display">[docs]</a>
+    <span class="k">def</span> <span class="nf">cloud_display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here is called point_cloud_visualizer from src package to create display window for effects of OpenMVG.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ADVANCED_DISPLAY</span><span class="p">:</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;python&quot;</span><span class="p">,</span> <span class="s2">&quot;src/point_cloud_visualizer.py&quot;</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">TEST_MODE_ON</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">output_text_browser</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;default/colorized.ply&quot;</span>
+                <span class="k">if</span> <span class="n">TEST_MODE_ON</span>
+                <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="p">,</span> <span class="s2">&quot;reconstruction_sequential&quot;</span><span class="p">,</span> <span class="s2">&quot;colorized.ply&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">point_cloud</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_point_cloud</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            <span class="c1"># Visualize the point cloud</span>
+            <span class="n">o3d</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">draw_geometries</span><span class="p">([</span><span class="n">point_cloud</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="MainWindow.mesh_display">
+<a class="viewcode-back" href="../main.html#main.MainWindow.mesh_display">[docs]</a>
+    <span class="k">def</span> <span class="nf">mesh_display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function creates display for mesh objects which represents the final effect.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">win</span> <span class="o">=</span> <span class="n">MainWindow</span><span class="p">()</span>
+
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">QStackedWidget</span><span class="p">()</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">win</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">600</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">800</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">setWindowFlag</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">FramelessWindowHint</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, BMD team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

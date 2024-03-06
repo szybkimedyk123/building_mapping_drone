@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main module &mdash; Building Mapping Drone 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="src package" href="src.html" />
+    <link rel="prev" title="default package" href="default.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Building Mapping Drone
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bdm</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="default.html">default package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">main module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#main.MainWindow"><code class="docutils literal notranslate"><span class="pre">MainWindow</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.animate_drone"><code class="docutils literal notranslate"><span class="pre">MainWindow.animate_drone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.apply_options"><code class="docutils literal notranslate"><span class="pre">MainWindow.apply_options()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.check_script_status"><code class="docutils literal notranslate"><span class="pre">MainWindow.check_script_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.close_app"><code class="docutils literal notranslate"><span class="pre">MainWindow.close_app()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.close_options_window"><code class="docutils literal notranslate"><span class="pre">MainWindow.close_options_window()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.cloud_display"><code class="docutils literal notranslate"><span class="pre">MainWindow.cloud_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.loading_screen"><code class="docutils literal notranslate"><span class="pre">MainWindow.loading_screen()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.mesh_display"><code class="docutils literal notranslate"><span class="pre">MainWindow.mesh_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.mouseMoveEvent"><code class="docutils literal notranslate"><span class="pre">MainWindow.mouseMoveEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.mousePressEvent"><code class="docutils literal notranslate"><span class="pre">MainWindow.mousePressEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.mouseReleaseEvent"><code class="docutils literal notranslate"><span class="pre">MainWindow.mouseReleaseEvent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.options_dialog"><code class="docutils literal notranslate"><span class="pre">MainWindow.options_dialog()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.run_openmvg_script"><code class="docutils literal notranslate"><span class="pre">MainWindow.run_openmvg_script()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.select_input_directory"><code class="docutils literal notranslate"><span class="pre">MainWindow.select_input_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.select_output_directory"><code class="docutils literal notranslate"><span class="pre">MainWindow.select_output_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.set_main_window_status"><code class="docutils literal notranslate"><span class="pre">MainWindow.set_main_window_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.start_process"><code class="docutils literal notranslate"><span class="pre">MainWindow.start_process()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main.MainWindow.staticMetaObject"><code class="docutils literal notranslate"><span class="pre">MainWindow.staticMetaObject</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html">src package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="srcUI.html">srcUI package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools.html">tools package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Building Mapping Drone</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">bdm</a></li>
+      <li class="breadcrumb-item active">main module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/main.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-main">
+<span id="main-module"></span><h1>main module<a class="headerlink" href="#module-main" title="Link to this heading"></a></h1>
+<p>This is the main function of the whole project. Here you can find MainWindow class which purpose is to process
+interaction with the user and running of other scripts. There are specific params connected with animations,
+display options and communication.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="main.MainWindow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">MainWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QMainWindow</span></code></p>
+<p>Purpose of this class is to:</p>
+<ul class="simple">
+<li><p>process interactions between user and main_ui or options_ui;</p></li>
+<li><p>run the main algorithms and update the UI status as they execute;</p></li>
+<li><p>create loading screen animation and text messages to user;</p></li>
+<li><p>display effects of algorithms in interactive windows.</p></li>
+</ul>
+<p>See functions descriptions for more detailed information.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.animate_drone">
+<span class="sig-name descname"><span class="pre">animate_drone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.animate_drone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.animate_drone" title="Link to this definition"></a></dt>
+<dd><p>This function updates move and rotation of a drone’s picture for purpose of loading screen.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.apply_options">
+<span class="sig-name descname"><span class="pre">apply_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.apply_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.apply_options" title="Link to this definition"></a></dt>
+<dd><p>Here is changed currently shown window from options_ui to main_ui with applying of chosen settings (if they
+are).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.check_script_status">
+<span class="sig-name descname"><span class="pre">check_script_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.check_script_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.check_script_status" title="Link to this definition"></a></dt>
+<dd><p>Purpose of this function is to check every 1 second if algorithm ended. It is done via connection with QTimer.
+When process ends a few things takes place:</p>
+<ul class="simple">
+<li><p>turning off animation;</p></li>
+<li><p>checking back background to previous one;</p></li>
+<li><p>enabling functional buttons again.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.close_app">
+<span class="sig-name descname"><span class="pre">close_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.close_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.close_app" title="Link to this definition"></a></dt>
+<dd><p>Save close of whole application</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.close_options_window">
+<span class="sig-name descname"><span class="pre">close_options_window</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.close_options_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.close_options_window" title="Link to this definition"></a></dt>
+<dd><p>Here is changed currently shown window from options_ui to main_u without applying of chosen settings (if they
+are).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.cloud_display">
+<span class="sig-name descname"><span class="pre">cloud_display</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.cloud_display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.cloud_display" title="Link to this definition"></a></dt>
+<dd><p>Here is called point_cloud_visualizer from src package to create display window for effects of OpenMVG.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.loading_screen">
+<span class="sig-name descname"><span class="pre">loading_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.loading_screen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.loading_screen" title="Link to this definition"></a></dt>
+<dd><p>Target of this function is to:</p>
+<ul class="simple">
+<li><p>change the background image of UI;</p></li>
+<li><p>call set_main_window_status to hide core UI functionalities;</p></li>
+<li><p>create animation and start loading screen.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.mesh_display">
+<span class="sig-name descname"><span class="pre">mesh_display</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.mesh_display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.mesh_display" title="Link to this definition"></a></dt>
+<dd><p>This function creates display for mesh objects which represents the final effect.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.mouseMoveEvent">
+<span class="sig-name descname"><span class="pre">mouseMoveEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.mouseMoveEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.mouseMoveEvent" title="Link to this definition"></a></dt>
+<dd><p>Overwritten mouseMoveEvent function from QMainWindow. Done for purpose of enabling moving whole application
+window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.mousePressEvent">
+<span class="sig-name descname"><span class="pre">mousePressEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.mousePressEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.mousePressEvent" title="Link to this definition"></a></dt>
+<dd><p>Overwritten mousePressEvent function from QMainWindow. Done for purpose of enabling moving whole application
+window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.mouseReleaseEvent">
+<span class="sig-name descname"><span class="pre">mouseReleaseEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.mouseReleaseEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.mouseReleaseEvent" title="Link to this definition"></a></dt>
+<dd><p>Overwritten mouseReleaseEvent function from QMainWindow. Done for purpose of enabling moving whole application
+window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.options_dialog">
+<span class="sig-name descname"><span class="pre">options_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.options_dialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.options_dialog" title="Link to this definition"></a></dt>
+<dd><p>Here is changed displayed window from main_ui to options_ui.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.run_openmvg_script">
+<span class="sig-name descname"><span class="pre">run_openmvg_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_option_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_windows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.run_openmvg_script"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.run_openmvg_script" title="Link to this definition"></a></dt>
+<dd><p>Here is called installation and execution of OpenMVG on chosen data or test_win.py script depends on flags.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p>use_option_a (bool): Indicates forcing agreement to install of required packages for OpenMVG</p></li>
+<li><p>test_windows (bool): Indicates to call test_win.py from src package instead of starting installation and execution of OpenMVG</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.select_input_directory">
+<span class="sig-name descname"><span class="pre">select_input_directory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.select_input_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.select_input_directory" title="Link to this definition"></a></dt>
+<dd><p>Display of QFileDialog.Options window to enable changing input directory plus checking if it is valid via
+QFileDialog.getExistingDirectory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.select_output_directory">
+<span class="sig-name descname"><span class="pre">select_output_directory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.select_output_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.select_output_directory" title="Link to this definition"></a></dt>
+<dd><p>Display of QFileDialog.Options window to enable changing output directory plus checking if it is valid via
+QFileDialog.getExistingDirectory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.set_main_window_status">
+<span class="sig-name descname"><span class="pre">set_main_window_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.set_main_window_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.set_main_window_status" title="Link to this definition"></a></dt>
+<dd><p>Function which blocs and hides interface for purpose of processing algorithm and loading screen.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p>flag (bool): Indicates visibility of the core UI functionalities.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="main.MainWindow.start_process">
+<span class="sig-name descname"><span class="pre">start_process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#MainWindow.start_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.MainWindow.start_process" title="Link to this definition"></a></dt>
+<dd><p>This function starts processing of input data via OpenMVG. It also checks if user set proper input and output
+paths for the process.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="main.MainWindow.staticMetaObject">
+<span class="sig-name descname"><span class="pre">staticMetaObject</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PySide2.QtCore.QMetaObject</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#main.MainWindow.staticMetaObject" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="default.html" class="btn btn-neutral float-left" title="default package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.html" class="btn btn-neutral float-right" title="src package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, BMD team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

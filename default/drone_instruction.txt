@@ -1,0 +1,13 @@
+**FOR DRONE OPERATOR**
+
+1. Ensure that the operation you are about to perform is safe and does not pose threats to infrastructure or your UAV.
+2. Walk around the building you are about to take pictures of and ensure that there are no power lines, trees, or other obstacles that you can collide with. If some obstacles are present, consider them during the flight.
+3. It is advised to use between 100 and 400 images - depending on the size of the structure. Generally, the more, the better however, using more than 400 images requires about 60GB of memory (RAM+SWAP). Ensure that the images overlap.
+4. After checking the surroundings and fulfilling other legally required actions, start mapping the chosen structure as described below:
+    - Fly at least on three different heights around the building creating "orbits" around it.
+    - Take pictures every second or so (during movement) to ensure plenty of overlapping points on images.
+    - If it is not possible to fly on a certain level but some areas are not visible from other perspectives, use your drone as a handheld camera and take pictures in the same manner as if you were flying. Using another camera (mixing devices in the dataset) can lead to errors.
+    - It's useful to have somebody looking for other dangers (cars, etc.) while you are performing mapping.
+    - Watch out for birds! Even the smaller ones can damage your drone and harm themselves.
+5. Run the application using the images you have just taken. Optionally, you can check images for useless ones (accidentally made, blurred, only sky visible, etc.).
+                
